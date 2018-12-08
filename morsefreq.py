@@ -4,23 +4,17 @@ import moresemom
 
 def morsefreq(ga, be):
     """
-    MORSEFREQ  Frequency measures for generalized Morse wavelets. [with F. Rekibi]
-
-    for beta=0, the "wavelet" becomes an analytic lowpass filter, and FM 
-    is not defined in the usual way.  Instead, FM is defined as the point
-    at which the filter has decayed to one-half of its peak power. 
+    Calculate important frequencies for generalized Morse wavelets
 
     to use
     ------
         fm, fe, fi, cf = morsefreq(gamma, beta)
-
     parameters
     ----------
         ga: matrix or a scalar
             gamma
         be: matrix of the same size as gamma or a scalar
             beta
-
     returns
     -------
         fm: radian
@@ -32,11 +26,18 @@ def morsefreq(ga, be):
         cf: radian
             curvature of fi
     ___________________________________________________________________
+    note
+    ----
+        for beta=0, the "wavelet" becomes an analytic lowpass filter, 
+        and FM is not defined in the usual way.  
+        Instead, FM is defined as the point at which the filter has decayed to 
+        one-half of its peak power. 
     source
     ------
     - Lilly and Olhede (2009).  Higher-order properties of analytic wavelets.  
     IEEE Trans. Sig. Proc., 57 (1), 146--160.
     - JLAB (C) 2004--2016 J. M. Lilly and F. Rekibi
+    
     """
 
     if be == 0:
