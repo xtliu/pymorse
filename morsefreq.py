@@ -1,7 +1,8 @@
 import numpy as np
+from scipy.special import gamma
 import moresemom
 
-def morsefreq(gamma, beta):
+def morsefreq(ga, be):
     """
     MORSEFREQ  Frequency measures for generalized Morse wavelets. [with F. Rekibi]
 
@@ -15,8 +16,10 @@ def morsefreq(gamma, beta):
 
     parameters
     ----------
-        gamma: matrix or a scalar
-        beta: matrix of the same size as gamma or a scalar
+        ga: matrix or a scalar
+            gamma
+        be: matrix of the same size as gamma or a scalar
+            beta
 
     returns
     -------
@@ -36,18 +39,17 @@ def morsefreq(gamma, beta):
     - JLAB (C) 2004--2016 J. M. Lilly and F. Rekibi
     """
 
-    if beta == 0:
-        fm = np.multiply((np.log(2)), np.divide(1,gamma)) #%Half-power point
+    if be == 0:
+        fm = np.multiply((np.log(2)), np.divide(1,ga)) #%Half-power point
     else:
-        fm = np.exp(np.multiply(np.divide(1,gamma), (np.log(beta)-np.log(gamma))))
+        fm = np.exp(np.multiply(np.divide(1,ga), (np.log(be)-np.log(ga))))
 
-    fe = np.multiply(np.divide(1,2**np.divide(1,gamma)), np.divide(gamma(np.divide(2**beta+2,gamma)),gamma(np.divide(2**beta+1,gamma))))
+    fe = np.multiply(np.divide(1,2**np.divide(1,ga)), np.divide(gamma(np.divide(2**be+2,ga)),gamma(np.divide(2**be+1,ga))))
 
-    fi = np.divide(gamma(np.divide(beta+2,gamma)),gamma(np.divide(beta+1,gamma)))
+    fi = np.divide(gamma(np.divide(be+2,ga)),gamma(np.divide(be+1,ga)))
 
-    m2, n2, k2 = morsemom(2, gamma, beta)
-    m3, n3, k3 = morsemom(3, gamma, beta)
+    m2, n2, k2 = morsemom(2, ga, be)
+    m3, n3, k3 = morsemom(3, ga, be)
     cf = -np.divide(k3,k2**(3/2))
 
     return fm, fe, fi, cf
-
