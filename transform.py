@@ -1,5 +1,9 @@
+"""
+morse wavelet transformation
+"""
+
 import numpy as np
-from morsewave.py import morse_wave
+from morsewave import morse_wave
 from scipy.fftpack import fft, ifft
 
 def morse_transform(x, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
@@ -33,7 +37,7 @@ def cont_transform(x, psif):
     # Unitary transform normalization
     if sum(np.isreal(x))==np.size(x):
         x /= np.sqrt(2)
-    ### and more
+        
     X = fft(x)
     T = np.multiply(X, psif)
     t = ifft(T)

@@ -1,5 +1,9 @@
+"""
+script to generate morse wavelets
+"""
+
 import numpy as np
-from morsefuncs.py import morsefreq, morseafun
+from morsefuncs import morsefreq, morseafun
 from scipy.special import gammaln, gamma
 
 def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
@@ -48,15 +52,19 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
         print('The edge wavelet has not been implemented yet.')
         return
 
-    psi=np.zeros((N,len(fs),K))
-    psif=np.zeros((N,len(fs),K))
+    fs = np.array(fs)
+    psi=np.zeros((N,np.size(fs),K))
+    psif=np.zeros((N,np.size(fs),K))
 
-    for n in range(len(fs)):
-        psif[:,n,:], psi[:,n,:] = morsewave1(N,K,ga,be,np.abs(fs[n]),nmlz,fam)
-        if fs(n) < 0:
-            if len(psi)==0:
-                psi[:,n,:] = np.conj(psi[:,n,:])
-            psif[1:,n,:] = np.flip(psif[1:,n,:],0)
+    if np.size(fs)==1:
+        psif[:,0,:], psi[:,0,:] = morsewave1(N,K,ga,be,np.abs(fs),nmlz,fam)
+    else:
+        for n in range(len(fs)):
+            psif[:,n,:], psi[:,n,:] = morsewave1(N,K,ga,be,np.abs(fs[n]),nmlz,fam)
+            if fs(n) < 0:
+                if len(psi)==0:
+                    psi[:,n,:] = np.conj(psi[:,n,:])
+                psif[1:,n,:] = np.flip(psif[1:,n,:],0)
 
     return psi, psif
 
@@ -64,21 +72,21 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
 def morsewave1(N, K, ga, be, fs, nmlz, fam):
     
     x = []
-    fo, _, _, _ = morsefreq(ga,be)
+    fo = morsefreq(ga,be,1)
     fact = np.divide(fs, fo)
     tt = np.linspace(0,1-np.divide(1,N),N)
     om = 2*np.pi*np.divide(tt, fact)
 
     if nmlz=='energy':
-        if be==0:
+        if np.all(be==0):
             psizero = np.exp(np.power(-om,ga))
         else:
             psizero=np.exp(np.multiply(be,np.log(om))-np.power(om,ga))
     elif nmlz=='bandpass':
-        if be==0:
+        if np.all(be==0):
             psizero = np.exp(np.power(-om,ga))
         else:
-            #%Alternate calculation to cancel things that blow up
+            # Alternate calculation to cancel things that blow up
             psizero=2*np.exp(np.multiply(-be,np.log(fo)) + np.power(fo,ga) + np.power(be,np.log(om)) - np.power(om,ga))
         
     psizero[0] /= 2 # due to unit step function
@@ -119,25 +127,20 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
                 coeff = 1
 
         L[index]=laguerre(2*np.power(om[index],ga),k,c)
-        psif[:,:,k] = np.multiply(np.multiply(coeff, psizero), L)    
+        psif[:,:,k] = np.reshape(np.multiply(np.multiply(coeff, psizero), L)) 
 
+    return psif
 
 def laguerre(x, k, c):
     """
     LAGUERRE Generalized Laguerre polynomials
-    %
-    %   Y=LAGUERRE(X,K,C) where X is a column vector returns the
-    %   generalized Laguerre polynomials specified by parameters K and C.
-    %  
-    %   LAGUERRE is used in the computation of the generalized Morse
-    %   wavelets and uses the expression given by Olhede and Walden (2002),
-    %  "Generalized Morse Wavelets", Section III D. 
-   
+
     """
+    x = np.array(x)
 
     y = np.zeros((np.size(x)))
     for m in range(k):
         fact = np.exp(gammaln(k+c+1)-gammaln(c+m+1)-gammaln(k-m+1))
-        y += np.divide(np.multiply(np.multiply(p.power(-1,m), fact), np.power(x,m)), gamma(m+1))
+        y += np.divide(np.multiply(np.multiply(np.power(-1,m), fact), np.power(x,m)), gamma(m+1))
 
     return y
