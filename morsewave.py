@@ -52,10 +52,15 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
         print('The edge wavelet has not been implemented yet.')
         return
 
+    # make sure the parameters are numpy arrays
     fs = np.array(fs)
+    ga = np.array(ga)
+    be = np.array(be)
+
     psi=np.zeros((N,np.size(fs),K))
     psif=np.zeros((N,np.size(fs),K))
 
+    #### line 208,209: for n=1:length(fs) [X(:,n,:),x(:,n,:)]=morsewave1(N,K,ga,be,abs(fs(n)),str,fam);
     if np.size(fs)==1:
         psif[:,0,:], psi[:,0,:] = morsewave1(N,K,ga,be,np.abs(fs),nmlz,fam)
     else:
@@ -71,9 +76,14 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
 
 def morsewave1(N, K, ga, be, fs, nmlz, fam):
     
-    x = []
+    # line 224-226: 
+    #fo=morsefreq(ga,be);
+    #fact=fs./fo;
+    #om=2*pi*linspace(0,1-1./N,N)'./fact;
+    # problem: fact is of the same size as ga or be, but that linspace has length N
+
     fo = morsefreq(ga,be,1)
-    fact = np.divide(fs, fo)
+    fact = np.divide(fs,fo)
     tt = np.linspace(0,1-np.divide(1,N),N)
     om = 2*np.pi*np.divide(tt, fact)
 
@@ -100,13 +110,15 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
         return
 
     X[X==np.inf] = 0
+    X[X==np.nan] = 0
 
-    ommat = np.repeat(np.repeat(om,np.size(X,2),2), np.size(X,1),1)
-    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) #%ensures wavelets are centered 
+    #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
+    ommat = np.tile(om,(1,np.shape(X)[1],np.shape(X)[2]))
+    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
 
     x = np.fft.ifft(Xr)
 
-    return x, X
+    return X, x
 
 
 def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
@@ -127,24 +139,13 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
                 coeff = 1
 
         L[index]=laguerre(2*np.power(om[index],ga),k,c)
-        psif[:,:,k] = np.reshape(np.multiply(np.multiply(coeff, psizero), L)) 
+        psif[:,:,k] = np.reshape(np.multiply(np.multiply(coeff, psizero), L), (N, np.size(ga)))
 
     return psif
 
 def laguerre(x, k, c):
     """
     LAGUERRE Generalized Laguerre polynomials
-<<<<<<< Updated upstream
-
-=======
-    %
-    %   Y=LAGUERRE(X,K,C) where X is a column vector returns the
-    %   generalized Laguerre polynomials specified by parameters K and C.
-    %  
-    %   LAGUERRE is used in the computation of the generalized Morse
-    %   wavelets and uses the expression given by Olhede and Walden (2002),
-    %  "Generalized Morse Wavelets", Section III D. 
->>>>>>> Stashed changes
     """
     x = np.array(x)
 
@@ -154,3 +155,6 @@ def laguerre(x, k, c):
         y += np.divide(np.multiply(np.multiply(np.power(-1,m), fact), np.power(x,m)), gamma(m+1))
 
     return y
+
+psi, psif =  morse_wave(10, np.array([2,3]), np.array([0.75,0.5]), 2, K=1, nmlz='bandpass', fam='primary')
+print(psi)
