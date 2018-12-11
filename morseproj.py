@@ -12,11 +12,11 @@
 # Usage: b = moresproj(ga, be1, be2)
 #
 # adapted from J.M. Lilly
+# (for details, see Lilly and Olhede (2009) Higher-order properties of analytic wavelets)
 import numpy as np
 from scipy.special import gamma
 
 def morseproj(ga, be1, be2):
-
     numerator = np.multiply(np.array(morseafun(ga, be1, 'energy')), np.array(morseafun(ga, be2, 'energy')))
     denominator = 2**(np.divide(be1+be2+1, ga))
     c = np.divide(numerator, denominator)
@@ -24,21 +24,3 @@ def morseproj(ga, be1, be2):
     b_gamma = gamma(np.divide(be1+be2+1, ga))
     b = np.multiply(b_intermediate, b_gamma)
     return b
-
-# test code lol maybe finish later
-#def morseproj_test():
-#    ga1 = np.linspace(2,9,8)
-#    be1 = np.linspace(1,10,10)
-#    [ga, be] = np.meshgrid(ga1,be1)
-#    om = morsefreq(ga, be)
-#
-#    dom = 0.01;
-#    om = np.linspace(0,20,2001)
-#    om2 = om[..., np.newaxis, np.newaxis].T
-#
-#a = np.linspace(2,9,8)
-#b = np.linspace(1,10,10)
-#[a2,b2] = np.meshgrid(a,b)
-#om = np.linspace(0,20,2001)
-#om2 = om[..., np.newaxis, np.newaxis].T
-#print(om2.shape)
