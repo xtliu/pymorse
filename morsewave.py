@@ -134,7 +134,17 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
 def laguerre(x, k, c):
     """
     LAGUERRE Generalized Laguerre polynomials
+<<<<<<< Updated upstream
 
+=======
+    %
+    %   Y=LAGUERRE(X,K,C) where X is a column vector returns the
+    %   generalized Laguerre polynomials specified by parameters K and C.
+    %  
+    %   LAGUERRE is used in the computation of the generalized Morse
+    %   wavelets and uses the expression given by Olhede and Walden (2002),
+    %  "Generalized Morse Wavelets", Section III D. 
+>>>>>>> Stashed changes
     """
     x = np.array(x)
 

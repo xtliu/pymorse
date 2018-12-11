@@ -37,7 +37,10 @@ def cont_transform(x, psif):
     # Unitary transform normalization
     if sum(np.isreal(x))==np.size(x):
         x /= np.sqrt(2)
+<<<<<<< Updated upstream
         
+=======
+>>>>>>> Stashed changes
     X = fft(x)
     T = np.multiply(X, psif)
     t = ifft(T)
