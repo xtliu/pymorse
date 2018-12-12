@@ -12,11 +12,11 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     ----------
         N: integer
             length of each wavelet
-        ga: a matrix or a scalar
+        ga: a scalar
             gamma
-        be: matrix of the same size as gamma or a scalar
+        be: a scalar
             beta
-        fs: a scalar or a 1-D array
+        fs: a scalar
             the radian frequencies at which the Fourier transform of the wavelets reach their maximum amplitudes
         K: natural number
             number different of orthogonal wavelets
@@ -85,6 +85,7 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     fo = morsefreq(ga,be,1)
     fact = np.divide(fs,fo)
     tt = np.linspace(0,1-np.divide(1,N),N)
+
     om = 2*np.pi*np.divide(tt, fact)
 
     if nmlz=='energy':
@@ -117,6 +118,9 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
 
     x = np.fft.ifft(Xr)
+
+    X = X[:,:,0]
+    x = x[:,:,0]
 
     return X, x
 
@@ -155,6 +159,3 @@ def laguerre(x, k, c):
         y += np.divide(np.multiply(np.multiply(np.power(-1,m), fact), np.power(x,m)), gamma(m+1))
 
     return y
-
-psi, psif =  morse_wave(10, np.array([2,3]), np.array([0.75,0.5]), 2, K=1, nmlz='bandpass', fam='primary')
-print(psi)
