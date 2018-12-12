@@ -150,7 +150,7 @@ def laguerre(x, k, c):
     x = np.array(x)
 
     y = np.zeros((np.size(x)))
-    for m in range(k):
+    for m in range(k+1):
         fact = np.exp(gammaln(k+c+1)-gammaln(c+m+1)-gammaln(k-m+1))
         y += np.divide(np.multiply(np.multiply(np.power(-1,m), fact), np.power(x,m)), gamma(m+1))
 
