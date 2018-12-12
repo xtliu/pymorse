@@ -10,3 +10,5 @@ hi this is our ELEC 483 final project
   * morse wavelet transform
 #### dependencies ####
 &nbsp;&nbsp; scipy v1.1.0, numpy v1.15
+#### authors ####
+Sophie D'Amico, Robin Kim, Xintong Liu
