@@ -52,9 +52,17 @@ def morsefreq(ga, be, nout=1):
     fm = np.exp(np.multiply(np.divide(1,ga), (np.log(be)-np.log(ga))))
     if np.size(be)==1:
         if be==0:
-            fm = np.power((np.log(2)), np.divide(1,ga)) 
+            fm = np.multiply((np.log(2)), np.divide(1,ga)) 
     else:
-        fm[be==0] = np.power((np.log(2)), np.divide(1,ga[be==0])) # Half-power point
+        if np.size(ga)==1:
+            gaa = np.zeros(np.shape(be))
+            if gaa.ndim == 1:
+                gaa[0] = ga
+            if gaa.ndim == 2:
+                gaa[0][0] = ga
+            fm[be==0] = np.multiply((np.log(2)), np.divide(1,gaa[be==0]))
+        else:
+            fm[be==0] = np.multiply((np.log(2)), np.divide(1,ga[be==0])) # Half-power point
 
     fe = np.multiply(np.divide(1,2**np.divide(1,ga)), np.divide(gamma(np.divide(2**be+2,ga)),gamma(np.divide(2**be+1,ga))))
     fi = np.divide(gamma(np.divide(be+2,ga)),gamma(np.divide(be+1,ga)))
@@ -80,8 +88,7 @@ def morseafun(ga, be, k=1, nmlz='bandpass'):
     if nmlz=='bandpass':
         om = morsefreq(ga, be)    
         a = np.divide(2, np.exp(np.multiply(be,np.log(om)) - np.power(om,ga)))
-        if np.size(be) > 1:
-            a[be==0] = 2
+        a[be==0] = 2
     elif nmlz=='test':
         a = np.sqrt(np.divide(2*np.pi*np.multiply(ga,2**np.divide(2*be+1,ga)), gamma(np.divide(2*be+1,ga))))
     elif nmlz=='energy':
@@ -98,7 +105,7 @@ def morsemom(p, ga, be, nargout):
     morsemom is a low-level function called by several other Morse wavelet functions.
 
     [mp, np, kp, lp] = morsemom(p, gamma, beta) computes the pth order frequency-
-    domain moment M and energy moment N of the lower-order generalized
+    domain moment M and enerfy moment N of the lower-order generalized
     Morse wavelet specified by parameters gamma and beta. it also returns the pth order
     cumulant kp and the pth order energy cumulant lp.
 
@@ -178,7 +185,7 @@ def morsef(ga, be):
     f = np.multiply(f_part1, f_part2)
     return f
 
-def mom2cum(cell):
+def mom2cum(mom):
     """
     mom2cum converts moments to cumulants. the unfortunate function name and following
     variable names were not our doing.
@@ -196,7 +203,6 @@ def mom2cum(cell):
     modified from J. M. Lilly
     (for details, see Lilly and Olhede (2009) Higher-order properties of analytic wavelets)
     """
-    mom = cell
     cum = np.zeros(np.shape(mom))
     cum[0] = np.log(mom[0])
 
@@ -207,17 +213,3 @@ def mom2cum(cell):
         cum[n] = np.divide(mom[n], mom[0]) - coeff
 
     return cum
-
-def mom2cum_test():
-    m = np.random.normal(size=4)
-    m = np.array([1,2,3,4])
-    k = np.zeros((4,1))
-    k[0] = m[0]
-    k[1] = m[1] - m[0]**2
-    k[2] = 2*m[0]**3 - 3*m[0] * m[1] + m[2]
-    k[3] = -6*m[0]**4 + 12*m[0]**2 * m[1] - 3*m[1]**2 - 4*m[0] * m[2] + m[3]
-    
-    k_test = mom2cum(m)
-    print(k_test, k)
-    return None
-    
