@@ -199,14 +199,19 @@ def mom2cum(mom):
     a similar list of lists (we think)
 
     usage: kcell = mom2cum(mcell)
+    
+    right now it is set up to only take in one moment as that's the only instance in which we call it!!!
+    modifying it would require slight modifications to the assignment of cum, as the input would have to
+    mimic that of a MATLAB cell, and right now we are inputting a single array (a single moment)
 
     modified from J. M. Lilly
     (for details, see Lilly and Olhede (2009) Higher-order properties of analytic wavelets)
     """
+    num_moments = 1
     cum = np.zeros(np.shape(mom))
-    cum[0] = np.log(mom[0])
+    cum = np.log(mom)
 
-    for n in range(1, len(mom)):
+    for n in range(1, num_moments):
         coeff = np.zeros(np.shape(cum[0]))
         for k in range(1, n):
             coeff = coeff + np.multiply(comb(n-1, k-1), np.multiply(cum[k], np.divide(mom[n-k], mom[0])))
