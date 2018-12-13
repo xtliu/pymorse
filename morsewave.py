@@ -60,7 +60,6 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     psi=np.zeros((N,np.size(fs),K))
     psif=np.zeros((N,np.size(fs),K))
 
-    #### line 208,209: for n=1:length(fs) [X(:,n,:),x(:,n,:)]=morsewave1(N,K,ga,be,abs(fs(n)),str,fam);
     if np.size(fs)==1:
         psif[:,0,:], psi[:,0,:] = morsewave1(N,K,ga,be,np.abs(fs),nmlz,fam)
     else:
@@ -75,12 +74,6 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
 
 
 def morsewave1(N, K, ga, be, fs, nmlz, fam):
-    
-    # line 224-226: 
-    #fo=morsefreq(ga,be);
-    #fact=fs./fo;
-    #om=2*pi*linspace(0,1-1./N,N)'./fact;
-    # problem: fact is of the same size as ga or be, but that linspace has length N
 
     fo = morsefreq(ga,be,1)
     fact = np.divide(fs,fo)
@@ -119,9 +112,6 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
 
     x = np.fft.ifft(Xr)
 
-    X = X[:,:,0]
-    x = x[:,:,0]
-
     return X, x
 
 
@@ -130,7 +120,7 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
     c = r-1
     L = np.zeros(np.size(om))
     index = np.arange(round(N/2))
-    psif = np.zeros((len(psizero),1,K))
+    psif = np.zeros((len(psizero),K))
 
     for k in range(K):
         if nmlz=='energy':
@@ -143,7 +133,7 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
                 coeff = 1
 
         L[index]=laguerre(2*np.power(om[index],ga),k,c)
-        psif[:,:,k] = np.reshape(np.multiply(np.multiply(coeff, psizero), L), (N, np.size(ga)))
+        psif[:,k] = np.multiply(np.multiply(coeff, psizero), L)
 
     return psif
 
