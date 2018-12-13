@@ -3,7 +3,7 @@ script to generate morse wavelets
 """
 
 import numpy as np
-from morsefuncs import morsefreq, morseafun
+from morsefuncs import morsefreq, morseafun, maxmax
 from scipy.special import gammaln, gamma
 
 def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
@@ -61,8 +61,8 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     print(N)
     print(np.size(fs))
     print(K)
-    psi=np.zeros((N,np.size(fs),K))
-    psif=np.zeros((N,np.size(fs),K))
+    psi=np.zeros((N,np.size(fs),K),dtype=complex)
+    psif=np.zeros((N,np.size(fs),K),dtype=complex)
 
     if np.size(fs)==1:
 
@@ -113,9 +113,7 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     X[X==np.inf] = 0
     X[X==np.nan] = 0
 
-
     ommat = np.tile(om, (K,1,np.size(fs))).T
-
 
     Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
     
@@ -162,49 +160,61 @@ def laguerre(x, k, c):
 
     return y
 
-#print("Plotting Morse Wavelets in Time Domain and Frequency Domain")
-#fs_list = [1,5,10]
-#psi, psif =  morse_wave(100, 2, 5, fs_list, K=1, nmlz='bandpass', fam='primary')
-#plt.figure()
-#plt.title('Time Domain Morse Wavelets')
-#for i in range(len(fs_list)):
-#    plt.plot(psi[:,i,0], label = 'Real Part for FS={}'.format(fs_list[i]))
-#    plt.plot(psi[:,i,1], label = 'Imaginary Part for FS={}'.format(fs_list[i]))
-#plt.legend()
-#
-#plt.figure()
-#plt.title('Frequency Domain Morse Wavelets')
-#for i in range(len(fs_list)):
-#    plt.plot(psif[:,i,0], label = 'FS={}'.format(fs_list[i])) 
-#plt.legend()
+#############################
+# test code and visualization
+"""
+import matplotlib.pyplot as plt
 
 print('Morse Wavelet Test...')
 N = 256 * 4
 be = 5
 ga = 2
 K = 3
-fs = 2 * pi/8/4
+fs = 2 * np.pi/8/4
 
 x,X = morse_wave(N,ga,be,fs,K,'bandpass')
 f = np.linspace(0,1,N)/N
 t = np.arange(0,len(X)) - len(X)/2
 
-plt.subplot(3,2,1)
-plt.plot(t,x[:,0,0])
-# mess around with xlim and ylim
-plt.ylim((-np.max(abs(x))*1.05, maxmax(abs(x))*1.05))
-plt.xlim((-60, 60))
+plt.figure(1)
+plt.subplot(3,1,1)
+plt.plot(t,x[:,0,0].real, label="real")
+plt.plot(t,np.imag(x[:,0,0]), label="imaginary")
+plt.legend()
+plt.title("k=1")
 
-plt.subplot(3,2,2)
-plt.plot(t,x[:,0,1])
-plt.subplot(3,2,3)
-plt.plot(t,x[:,0,2])
+plt.subplot(3,1,2)
+plt.plot(t,x[:,0,1].real, label="real")
+plt.plot(t,np.imag(x[:,0,1]), label="imaginary")
+plt.legend()
+plt.title("k=2")
 
-plt.subplot(3,2,4)
+plt.subplot(3,1,3)
+plt.plot(t,x[:,0,2].real, label="real")
+plt.plot(t,np.imag(x[:,0,1]), label="imaginary")
+plt.legend()
+plt.title("k=3")
+plt.legend()
+plt.suptitle("morse wavelets, time domain")
+
+plt.figure(2)
+
+plt.subplot(3,1,1)
 plt.plot(f,abs(X[:,0,0]))
-plt.subplot(3,2,5)
+plt.legend()
+plt.title("k=1")
+
+plt.subplot(3,1,2)
 plt.plot(f,abs(X[:,0,1]))
-plt.subplot(3,2,6)
+plt.legend()
+plt.title("k=2")
+
+plt.subplot(3,1,3)
 plt.plot(f,abs(X[:,0,2]))
+plt.legend()
+plt.title("k=3")
 
+plt.suptitle("morse wavelets, frequency domain")
 
+plt.show()
+"""

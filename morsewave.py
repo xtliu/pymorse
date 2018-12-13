@@ -6,6 +6,7 @@ import numpy as np
 from morsefuncs import morsefreq, morseafun
 from scipy.special import gammaln, gamma
 from scipy.fftpack import ifft
+import matplotlib.pyplot as plt
 
 def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     """
@@ -106,12 +107,10 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
 
     X[X==np.inf] = 0
     X[X==np.nan] = 0
-
-    print("X", np.shape(X))
-    print("om", np.shape(om))
+  
     #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
-    ommat = np.tile(om,(K,np.size(fs))).T
-    Xr = np.multiply(X, np.exp(np.multiply(1j*ommat,(N+1)/2*fact))) # ensures wavelets are centered 
+    ommat = np.tile(om,(K,np.size(fs))).T  
+    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1)/2*fact))) # ensures wavelets are centered 
 
     x = ifft(Xr)
 
@@ -158,11 +157,11 @@ be = 5
 ga = 2
 K = 3
 fs = 2*np.pi/32
-psi, psif = morse_wave(N, ga, be, fs, K, nmlz='energy')
+psi, psif = morse_wave(N, ga, be, fs, K, nmlz='bandpass')
+psif = abs(psif)
 f = np.linspace(0,1,N)
 t = np.arange(len(psif))-len(psif)/2
 
-import matplotlib.pyplot as plt
 plt.subplot(3,2,1)
 plt.plot(f,psif[:,0,0], label='k=1')
 plt.legend()
