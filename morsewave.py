@@ -65,7 +65,7 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     else:
         for n in range(len(fs)):
             psif[:,n,:], psi[:,n,:] = morsewave1(N,K,ga,be,np.abs(fs[n]),nmlz,fam)
-            if fs(n) < 0:
+            if fs[n] < 0:
                 if len(psi)==0:
                     psi[:,n,:] = np.conj(psi[:,n,:])
                 psif[1:,n,:] = np.flip(psif[1:,n,:],0)
@@ -107,10 +107,10 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     X[X==np.nan] = 0
 
     #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
-    ommat = np.tile(om,(1,np.shape(X)[1],np.shape(X)[2]))
-    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
+    #ommat = np.tile(om,(np.shape(X)[0],np.shape(X)[1]))
+    #Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
 
-    x = np.fft.ifft(Xr)
+    x = np.fft.ifft(X)
 
     return X, x
 
