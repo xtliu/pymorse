@@ -3,10 +3,8 @@ script to generate morse wavelets
 """
 
 import numpy as np
-from morsefuncs import morsefreq, morseafun
+from morsefuncs import morsefreq, morseafun, maxmax
 from scipy.special import gammaln, gamma
-from scipy.fftpack import ifft
-import matplotlib.pyplot as plt
 
 def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     """
@@ -14,11 +12,11 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     ----------
         N: integer
             length of each wavelet
-        ga: a scalar
+        ga: a matrix or a scalar
             gamma
-        be: a scalar
+        be: matrix of the same size as gamma or a scalar
             beta
-        fs: a scalar
+        fs: a scalar or a 1-D array
             the radian frequencies at which the Fourier transform of the wavelets reach their maximum amplitudes
         K: natural number
             number different of orthogonal wavelets
@@ -58,14 +56,16 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     fs = np.array(fs)
     ga = np.array(ga)
     be = np.array(be)
-
-    psi=np.zeros((N,np.size(fs),K))
-    psif=np.zeros((N,np.size(fs),K))
+    
+    psi=np.zeros((N,np.size(fs),K),dtype=complex)
+    psif=np.zeros((N,np.size(fs),K),dtype=complex)
 
     if np.size(fs)==1:
-        psif[:,0,:], psi[:,0,:] = morsewave1(N,K,ga,be,np.abs(fs),nmlz,fam)
+
+        psif[:,:,:], psi[:,:,:] = morsewave1(N,K,ga,be,np.abs(fs),nmlz,fam)
     else:
         for n in range(len(fs)):
+
             psif[:,n,:], psi[:,n,:] = morsewave1(N,K,ga,be,np.abs(fs[n]),nmlz,fam)
             if fs[n] < 0:
                 if len(psi)==0:
@@ -78,10 +78,11 @@ def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
 def morsewave1(N, K, ga, be, fs, nmlz, fam):
 
     fo = morsefreq(ga,be,1)
+    print(fo)
     fact = np.divide(fs,fo)
     tt = np.linspace(0,1-np.divide(1,N),N)
-
     om = 2*np.pi*np.divide(tt, fact)
+
 
     if nmlz=='energy':
         if np.all(be==0):
@@ -93,8 +94,8 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
             psizero = np.exp(np.power(-om,ga))
         else:
             # Alternate calculation to cancel things that blow up
-            psizero=2*np.exp(np.multiply(-be,np.log(fo)) + np.power(fo,ga) + np.power(be,np.log(om)) - np.power(om,ga))
-        
+            psizero=2*np.exp(np.multiply(-be,np.log(fo)) + np.power(fo,ga) + np.multiply(be,np.log(om)) - np.power(om,ga))
+
     psizero[0] /= 2 # due to unit step function
 
     psizero[psizero==np.nan] = 0
@@ -107,12 +108,12 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
 
     X[X==np.inf] = 0
     X[X==np.nan] = 0
-  
-    #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
-    ommat = np.tile(om,(K,np.size(fs))).T  
-    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1)/2*fact))) # ensures wavelets are centered 
 
-    x = ifft(Xr)
+    ommat = np.tile(om, (K,1,np.size(fs))).T
+
+    Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
+    
+    x = np.fft.ifft(Xr,axis=0)
 
     return X, x
 
@@ -122,11 +123,11 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
     c = r-1
     L = np.zeros(np.size(om))
     index = np.arange(round(N/2))
-    psif = np.zeros((len(psizero),K))
+    psif = np.zeros((len(psizero),1,K))
 
     for k in range(K):
         if nmlz=='energy':
-            A = morseafun(k+1,ga,be,nmlz)
+            A = morseafun(ga,be,k+1,nmlz)
             coeff = np.sqrt(np.divide(1,fact))*A
         elif nmlz=='bandpass':
             if be!=0:
@@ -135,7 +136,8 @@ def morsewave_first_family(fact,N,K,ga,be,om,psizero,nmlz):
                 coeff = 1
 
         L[index]=laguerre(2*np.power(om[index],ga),k,c)
-        psif[:,k] = np.multiply(np.multiply(coeff, psizero), L)
+        
+        psif[:,:,k] = np.reshape(np.multiply(np.multiply(coeff, psizero), L), (N, 1))
 
     return psif
 
@@ -152,36 +154,57 @@ def laguerre(x, k, c):
 
     return y
 
-N = 256*4
+#############################
+# test code and visualization
+"""
+print('Morse Wavelet Test...')
+N = 256 * 4
 be = 5
 ga = 2
 K = 3
-fs = 2*np.pi/32
-psi, psif = morse_wave(N, ga, be, fs, K, nmlz='bandpass')
-psif = abs(psif)
-f = np.linspace(0,1,N)
-t = np.arange(len(psif))-len(psif)/2
+fs = 2 * np.pi/8/4
 
-plt.subplot(3,2,1)
-plt.plot(f,psif[:,0,0], label='k=1')
-plt.legend()
-plt.subplot(3,2,3)
-plt.plot(f,psif[:,0,1], label='k=2')
-plt.legend()
-plt.subplot(3,2,5)
-plt.plot(f,psif[:,0,2], label='k=3')
-plt.legend()
-plt.subplot(3,2,2)
-plt.plot(t,psi[:,0,0].real, label='k=1')
-plt.plot(t,psi[:,0,0].imag, label='k=1')
-plt.legend()
-plt.subplot(3,2,4)
-plt.plot(t,psi.real[:,0,1], label='k=2')
-plt.plot(t,psi.imag[:,0,1], label='k=2')
-plt.legend()
-plt.subplot(3,2,6)
-plt.plot(t,psi.real[:,0,2], label='k=3')
-plt.plot(t,psi.imag[:,0,2], label='k=3')
+import matplotlib.pyplot as plt
 
+x,X = morse_wave(N,ga,be,fs,K,'energy')
+f = np.linspace(0,1,N)/N
+t = np.arange(0,len(X)) - len(X)/2
+
+plt.figure(1)
+plt.subplot(3,1,1)
+plt.plot(t,x[:,0,0].real, label="real")
+plt.plot(t,np.imag(x[:,0,0]), label="imaginary")
 plt.legend()
+plt.title("k=1")
+
+plt.subplot(3,1,2)
+plt.plot(t,x[:,0,1].real, label="real")
+plt.plot(t,np.imag(x[:,0,1]), label="imaginary")
+plt.legend()
+plt.title("k=2")
+
+plt.subplot(3,1,3)
+plt.plot(t,x[:,0,2].real, label="real")
+plt.plot(t,np.imag(x[:,0,1]), label="imaginary")
+plt.legend()
+plt.title("k=3")
+plt.suptitle("morse wavelets, time domain")
+
+plt.figure(2)
+
+plt.subplot(3,1,1)
+plt.plot(f,abs(X[:,0,0]))
+plt.title("k=1")
+
+plt.subplot(3,1,2)
+plt.plot(f,abs(X[:,0,1]))
+plt.title("k=2")
+
+plt.subplot(3,1,3)
+plt.plot(f,abs(X[:,0,2]))
+plt.title("k=3")
+
+plt.suptitle("morse wavelets, frequency domain")
+
 plt.show()
+"""

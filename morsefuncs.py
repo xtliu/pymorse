@@ -94,7 +94,7 @@ def morseafun(ga, be, k=1, nmlz='bandpass'):
     elif nmlz=='energy':
         r = np.divide(2*be+1,ga)
         a = np.sqrt(2*np.pi*np.multiply(np.multiply(ga, (2**r)),np.exp(gammaln(k)-gammaln(k+r-1))))
-    
+    print(ga, be)
     return a
 
 
