@@ -106,11 +106,13 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     X[X==np.inf] = 0
     X[X==np.nan] = 0
 
+    print("X", np.shape(X))
+    print("om", np.shape(om))
     #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
-    #ommat = np.tile(om,(np.shape(X)[0],np.shape(X)[1]))
-    #Xr = np.multiply(X, np.exp(1j*np.multiply(ommat,(N+1))/2*fact)) # ensures wavelets are centered 
+    ommat = np.tile(om,(K,1)).T
+    Xr = np.multiply(X, np.exp(1j*ommat*(N+1)/2,fact)) # ensures wavelets are centered 
 
-    x = np.fft.ifft(X)
+    x = np.fft.ifft(Xr)
 
     return X, x
 
@@ -149,3 +151,37 @@ def laguerre(x, k, c):
         y += np.divide(np.multiply(np.multiply(np.power(-1,m), fact), np.power(x,m)), gamma(m+1))
 
     return y
+
+N = 256*4
+be = 5
+ga = 2
+K = 3
+fs = 2*np.pi/32
+psi, psif = morse_wave(N, ga, be, fs, K, nmlz='energy')
+f = np.linspace(0,1,N)
+t = np.arange(len(psif))-len(psif)/2
+
+import matplotlib.pyplot as plt
+plt.subplot(3,2,1)
+plt.plot(f,psif[:,0,0], label='k=1')
+plt.legend()
+plt.subplot(3,2,3)
+plt.plot(f,psif[:,0,1], label='k=2')
+plt.legend()
+plt.subplot(3,2,5)
+plt.plot(f,psif[:,0,2], label='k=3')
+plt.legend()
+plt.subplot(3,2,2)
+plt.plot(t,psi[:,0,0].real, label='k=1')
+plt.plot(t,psi[:,0,0].imag, label='k=1')
+plt.legend()
+plt.subplot(3,2,4)
+plt.plot(t,psi.real[:,0,1], label='k=2')
+plt.plot(t,psi.imag[:,0,1], label='k=2')
+plt.legend()
+plt.subplot(3,2,6)
+plt.plot(t,psi.real[:,0,2], label='k=3')
+plt.plot(t,psi.imag[:,0,2], label='k=3')
+
+plt.legend()
+plt.show()
