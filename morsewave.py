@@ -5,6 +5,7 @@ script to generate morse wavelets
 import numpy as np
 from morsefuncs import morsefreq, morseafun
 from scipy.special import gammaln, gamma
+from scipy.fftpack import ifft
 
 def morse_wave(N, ga, be, fs, K=1, nmlz='bandpass', fam='primary'):
     """
@@ -109,10 +110,10 @@ def morsewave1(N, K, ga, be, fs, nmlz, fam):
     print("X", np.shape(X))
     print("om", np.shape(om))
     #### line 258: ommat=vrep(vrep(om,size(X,3),3),size(X,2),2);
-    ommat = np.tile(om,(K,1)).T
-    Xr = np.multiply(X, np.exp(1j*ommat*(N+1)/2,fact)) # ensures wavelets are centered 
+    ommat = np.tile(om,(K,np.size(fs))).T
+    Xr = np.multiply(X, np.exp(np.multiply(1j*ommat,(N+1)/2*fact))) # ensures wavelets are centered 
 
-    x = np.fft.ifft(Xr)
+    x = ifft(Xr)
 
     return X, x
 
